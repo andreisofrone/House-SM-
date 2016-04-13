@@ -1,0 +1,265 @@
+org 100h  ;offset
+;la pornire,programul solicita o parola(pass),daca
+;este verificata acesta va desena o casa,respectiv
+;daca accesul va fi refuzat acesta se va opri si va emite
+;un semnal sonor (beep).
+;cls  
+   ;AUTENTIFICARE (PAROLA = pass)
+
+          MSG2 DB 13,10,"Password: "   
+          STR1 DB  255 DUP('$')
+          
+          LEA DX,MSG2
+          MOV AH,09H
+          INT 21H
+
+          LEA DX,STR1
+          MOV AH,09H
+          INT 21H
+              
+verify:
+mov dx, offset buffer
+mov ah, 0x0a
+int 0x21
+jmp print
+
+buffer db 0x15,?, 0x15 dup(' ') ;se impune un maxim de 21 de caractere introduse
+print:
+mov ah, 0x02
+mov dl, 0x0a
+int 0x21
+mov dl, 0x0d
+int 0x21
+
+xor bx, bx
+mov bl, buffer[1] ;tine numarul de caractere introduse
+
+
+mov cx, msgend - offset msg ; se calculeaza lungimea mesajului
+
+jmp msgend
+msg db "pass" ;definire parola
+msgend:
+cmp bl, cl;cverificare parola(compara pass cu textul introdus)
+JE program  ;daca parola este corecta se trece mai departe le sectiune"program" 
+
+mov ah, 02
+mov dl, 07h ;se produce beepul
+int 21h ;se emite sunetul
+int 10h
+hlt
+ 
+       ;PROGRAM PRINCIPAL
+
+
+program:
+ 
+mov ax,0600h ;scroleaza ecran
+mov bh,07 ;normal attribute
+mov cx,0000 ;de la randul =00,coloana=00
+mov dx,184fh ;de la randul=18h, coloana=4fh
+int 10h ;intrerupere pentru cls
+mov ah,00 ;se seteaza modul
+mov al,13h ;mode=13(CGA Rezolutie mare)
+int 10h ;intrerupere pentru cls
+
+;Desenare casa
+
+;linie jos
+mov cx,160
+mov dx,155
+hseB: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+cmp cx,246
+jnz hseB   ;jump daca nu este 0
+  
+;linie sus
+mov cx,160 ;porneste de la linia=160 si
+mov dx,105 ;coloana=105
+LinSus: mov ah,0ch ;ah=0ch desenare linie
+mov al,09h ;culoarea mov
+int 10h ;intrerupere pentru desenare linie
+inc cx ;incrementeaza pozitia verticala
+cmp cx,246 ;deseneala linia pana la randul=246
+jnz LinSus 
+
+;linie verticala stanga
+mov cx,160
+mov dx,105
+LinS: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,155
+jnz LinS  
+
+;linie verticala dreapta
+mov cx,246
+mov dx,105
+LinSt: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,156
+jnz LinSt 
+
+;linie dreapta acoperis
+mov cx,203
+mov dx,62
+LinStAcop: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+inc dx
+cmp cx,246
+cmp dx,105
+jnz LinStAcop
+
+;linie acoperis stanga
+mov cx,160
+mov dx,105
+LinSR: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+dec dx
+cmp cx,203
+cmp dx,62
+jnz LinSR
+   ;Usa
+
+;linie dreapta usa
+mov cx,212
+mov dx,155
+LinStD: mov ah,0ch
+mov al,09h
+int 10h
+dec dx
+cmp dx,130
+jnz LinStD     
+
+;linie usa stanga
+mov cx,194
+mov dx,155
+LinSD: mov ah,0ch
+mov al,09h
+int 10h
+dec dx
+cmp dx,130
+jnz LinSD  
+
+;linie usa sus
+mov cx,194
+mov dx,130
+LinSusD: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+cmp cx,213
+jnz LinSusD 
+
+;Geamuri   
+ 
+;geam dreapta linie 1(vert)
+mov cx,220
+mov dx,115
+LinDr1: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,135
+jnz LinDr1
+
+;geam dreapta lini 2
+mov cx,230
+mov dx,115
+LinDr2: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,135
+jnz LinDr2 
+
+;geam dreapta lini3
+mov cx,240
+mov dx,115
+LinDr3: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,135
+jnz LinDr3
+ 
+;geam stanga linie 1 (vert)
+mov cx,166
+mov dx,115
+LinSt1: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,135
+jnz LinSt1
+
+;geam stanga linie 2 (vert)
+mov cx,176
+mov dx,115
+LinSt2: mov ah,0ch
+mov al,09h
+int 10h
+inc dx
+cmp dx,135
+jnz LinSt2 
+
+;geam stanga linie 3 (vert)
+mov cx,186
+mov dx,115
+LinSt3: mov ah,0ch
+mov al,09h
+int 10h
+inc dx 
+cmp dx,135
+jnz LinSt3
+     
+     
+;linie 1 orizontala geamuri
+mov cx,166
+mov dx,115
+LinGO1: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+cmp cx,186
+jnz LinGO1
+mov cx,220 ;lini continua pt geamul 2: column=220
+mov dx,115
+LinGO1b: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+cmp cx,240
+jnz LinGO1b
+    
+;linie 2 orizontala geamuri
+mov cx,166
+mov dx,135
+LinGO2: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+cmp cx,187
+jnz LinGO2
+mov cx,220
+mov dx,135
+LinGO2b: mov ah,0ch
+mov al,09h
+int 10h
+inc cx
+cmp cx,241
+jnz LinGO2b      
+
+
+
+
+     
